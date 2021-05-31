@@ -2,38 +2,23 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import java.util.List;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaCurrentGame;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TfodCurrentGame;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Autonomus")
-public class Autonomus extends LinearOpMode {
+@TeleOp(name = "FullDriveJavaTwoPerson")
+public class FullDriveJavaTwoPerson extends LinearOpMode {
 
-  private VuforiaCurrentGame vuforiaUltimateGoal;
-  private TfodCurrentGame tfodUltimateGoal;
-
-  Recognition recognition;
-  
-  private DcMotor RightFront;
-  private DcMotor RightBack;
   private DcMotor LeftFront;
   private DcMotor LeftBack;
+  private DcMotor RightFront;
   private DcMotor leftflywheel;
   private DcMotor rightflywheel;
+  private DcMotor RightBack;
   private DcMotor intake;
-  private String state;
-  private double numberOfRings;
+  private float LeftStickY;
   private Servo FrontWobble;
   private Servo BackWobble;
 
@@ -42,339 +27,110 @@ public class Autonomus extends LinearOpMode {
    */
   @Override
   public void runOpMode() {
-    List<Recognition> recognitions;
-    double index;
-
-    vuforiaUltimateGoal = new VuforiaCurrentGame();
-    tfodUltimateGoal = new TfodCurrentGame();
-
-    // Sample TFOD Op Mode
-    // Initialize Vuforia.
-    // This sample assumes phone is in landscape mode.
-    // Rotate phone -90 so back camera faces "forward" direction on robot.
-    // We need Vuforia to provide TFOD with camera images.
-    vuforiaUltimateGoal.initialize(
-        "", // vuforiaLicenseKey
-        hardwareMap.get(WebcamName.class, "Webcam 1"), // cameraName
-        "", // webcamCalibrationFilename
-        false, // useExtendedTracking
-        true, // enableCameraMonitoring
-        VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES, // cameraMonitorFeedback
-        0, // dx
-        0, // dy
-        0, // dz
-        90, // xAngle
-        180, // yAngle
-        90, // zAngle
-        true); // useCompetitionFieldTargetLocations
-    // Set min confidence threshold to 0.7
-    tfodUltimateGoal.initialize(vuforiaUltimateGoal, 0.5F, true, true);
-    // Initialize TFOD before waitForStart.
-    // Init TFOD here so the object detection labels are visible
-    // in the Camera Stream preview window on the Driver Station.
-    tfodUltimateGoal.activate();
-    // Enable following block to zoom in on target.
-    tfodUltimateGoal.setZoom(3, 17 / 9);
-    telemetry.addData(">", "Press Play to start");
-    telemetry.update();
-    // Wait for start command from Driver Station.
-    
-    RightFront = hardwareMap.get(DcMotor.class, "RightFront");
-    RightBack = hardwareMap.get(DcMotor.class, "RightBack");
     LeftFront = hardwareMap.get(DcMotor.class, "LeftFront");
     LeftBack = hardwareMap.get(DcMotor.class, "LeftBack");
+    RightFront = hardwareMap.get(DcMotor.class, "RightFront");
     leftflywheel = hardwareMap.get(DcMotor.class, "leftflywheel");
     rightflywheel = hardwareMap.get(DcMotor.class, "rightflywheel");
+    RightBack = hardwareMap.get(DcMotor.class, "RightBack");
     intake = hardwareMap.get(DcMotor.class, "intake");
     FrontWobble = hardwareMap.get(Servo.class, "FrontWobble");
     BackWobble = hardwareMap.get(Servo.class, "BackWobble");
 
-    RightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-    //RightBack.setDirection(DcMotorSimple.Direction.REVERSE);
-    //LeftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-    LeftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+
+    // Put initialization blocks here.
+    LeftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+    //LeftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+    RightBack.setDirection(DcMotorSimple.Direction.REVERSE);
     leftflywheel.setDirection(DcMotorSimple.Direction.REVERSE);
     rightflywheel.setDirection(DcMotorSimple.Direction.REVERSE);
-    intake.setDirection(DcMotorSimple.Direction.REVERSE);
-    // Put initialization blocks here.
-    
-    
     waitForStart();
     if (opModeIsActive()) {
-      numberOfRings = 0;
-      BackWobble.setPosition(0);
-      sleep(2000);
-      FrontWobble.setPosition(0);
-      recognitions = tfodUltimateGoal.getRecognitions();
-      // If list is empty, inform the user. Otherwise, go
-      // through list and display info for each recognition.
-      if (recognitions.size() == 0) {
-          telemetry.addData("TFOD", "No items detected.");
-          numberOfRings = 0;
-      } else {
-          index = 0;
-          // Iterate through list and call a function to
-          // display info for each recognized object.
-          for (Recognition recognition_item : recognitions) {
-            recognition = recognition_item;
-            if (recognition.getLabel() == "Quad") {
-              numberOfRings = 4;
+      // Put run blocks here.
+      while (opModeIsActive()) {
+        
+        if (0.1 > gamepad1.left_stick_y && gamepad1.left_stick_y > -0.1) {
+          LeftStickY = 0;
+        }
+        else {
+          LeftStickY = gamepad1.left_stick_y;
+        }
+        
+        
+        if (gamepad1.left_trigger == 0) {
+            LeftFront.setPower(((LeftStickY - (gamepad1.left_stick_x / 3)) - gamepad1.right_stick_x));
+            RightFront.setPower(((LeftStickY + (gamepad1.left_stick_x / 3)) + gamepad1.right_stick_x));
+            LeftBack.setPower(((LeftStickY + (gamepad1.left_stick_x / 2.5)) - gamepad1.right_stick_x));
+            RightBack.setPower(((LeftStickY - (gamepad1.left_stick_x / 2.5 )) + gamepad1.right_stick_x));
+        }
+        else {
+            LeftFront.setPower(((LeftStickY - (gamepad1.left_stick_x / 2)) - gamepad1.right_stick_x) / 1.5);
+            RightFront.setPower(((LeftStickY + (gamepad1.left_stick_x / 2)) + gamepad1.right_stick_x) / 1.5);
+            LeftBack.setPower(((LeftStickY + (gamepad1.left_stick_x / 1.5)) - gamepad1.right_stick_x) / 1.5);
+            RightBack.setPower(((LeftStickY - (gamepad1.left_stick_x / 1.5)) + gamepad1.right_stick_x) / 1.5);
+        }
+        
+        if (gamepad2.right_bumper == true) {
+          intake.setPower(0.8);
+        } else if (gamepad2.left_bumper == true) {
+          intake.setPower(-0.8);
+        } else {
+          intake.setPower(0);
+        }
+        if (gamepad2.triangle == true) {
+          ((DcMotorEx) leftflywheel).setVelocity(1025);
+          ((DcMotorEx) rightflywheel).setVelocity(1025);
+        }
+        if (gamepad2.circle == true) {
+          ((DcMotorEx) leftflywheel).setVelocity(850);
+          ((DcMotorEx) rightflywheel).setVelocity(850);
+        }
+        if (gamepad2.dpad_left == true) {
+          BackWobble.setPosition(1);
+          FrontWobble.setPosition(1);
+        }
+        if (gamepad2.dpad_right) {
+          BackWobble.setPosition(0);
+          FrontWobble.setPosition(0);
+        }
+        if (gamepad2.cross == true) {
+          ((DcMotorEx) leftflywheel).setVelocity(0);
+          ((DcMotorEx) rightflywheel).setVelocity(0);
+        }
+        if (gamepad2.dpad_up == true) {
+          ((DcMotorEx) LeftBack).setVelocity(0);
+          ((DcMotorEx) LeftFront).setVelocity(0);
+          ((DcMotorEx) RightBack).setVelocity(0);
+          ((DcMotorEx) RightFront).setVelocity(0);
+          ((DcMotorEx) rightflywheel).setVelocity(850);
+          ((DcMotorEx) leftflywheel).setVelocity(850);
+          sleep(1000);
+          for (int count = 0; count < 3; count++) {
+            if (gamepad2.dpad_down == true) {
               break;
             }
-            else if (recognition.getLabel() == "Single") {
-              numberOfRings = numberOfRings + 1;
-              if (numberOfRings > 1) {
-                telemetry.addData("Trevon Stinks", "He Smells");
-                telemetry.update();
-                numberOfRings = 4;
-                break;
-              }
+            intake.setPower(-0.8);
+            if (gamepad2.dpad_down == true) {
+              break;
             }
-            // Display info.
-            displayInfo(index);
-            // Increment index.
-            index = index + 1;
+            sleep(1250);
+            if (gamepad2.dpad_down == true) {
+              break;
+            }
+            intake.setPower(0);
+            if (gamepad2.dpad_down == true) {
+              break;
+            }
+            sleep(800);
+            if (gamepad2.dpad_down == true) {
+              break;
+            }
           }
-      }
-      
-      sleep(1000);
-      
-      telemetry.addData("Vuforia Done ", "090909");
-      
-      telemetry.update();
-      
-      goStraight(50);
-      
-
-      leftflywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-      rightflywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-      ((DcMotorEx) rightflywheel).setVelocity(1010);
-      ((DcMotorEx) leftflywheel).setVelocity(1010);
-      sleep(1000);
-      for (int count = 0; count < 3; count++) {
-        if (gamepad1.dpad_down == true) {
-          break;
+          ((DcMotorEx) leftflywheel).setVelocity(0);
+          ((DcMotorEx) rightflywheel).setVelocity(0);
         }
-        intake.setPower(0.8);
-        sleep(1350);
-        intake.setPower(0);
-        sleep(500);
+        telemetry.update();
       }
-      ((DcMotorEx) rightflywheel).setVelocity(0);
-      ((DcMotorEx) leftflywheel).setVelocity(0);
-      // Put run blocks here.
-     
-      if (numberOfRings == 0) {
-        //do stuff
-        telemetry.addData("Ring", "Zero rings");
-        goStraight(4000);
-        FrontWobble.setPosition(1);
-        BackWobble.setPosition(1);
-        
-        
-      }
-      else if (numberOfRings == 1) {
-        LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftFront.setTargetPosition(250);
-        LeftBack.setTargetPosition(250);
-
-        LeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        ((DcMotorEx) LeftFront).setVelocity(650);
-        ((DcMotorEx) LeftBack).setVelocity(650);
-        while (LeftFront.isBusy()) {
-        }
-        ((DcMotorEx) LeftFront).setVelocity(0);
-        ((DcMotorEx) LeftBack).setVelocity(0);
-
-        sleep(3000);
-
-        goStraight(2600);
-
-        LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftFront.setTargetPosition(-500);
-        RightFront.setTargetPosition(500);
-        LeftBack.setTargetPosition(-500);
-        RightBack.setTargetPosition(500);
-        LeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        RightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        RightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        ((DcMotorEx) LeftFront).setVelocity(-600);
-        ((DcMotorEx) LeftBack).setVelocity(-600);
-        ((DcMotorEx) RightFront).setVelocity(600);
-        ((DcMotorEx) RightBack).setVelocity(600);
-        while (LeftFront.isBusy()) {
-        }
-        ((DcMotorEx) LeftFront).setVelocity(0);
-        ((DcMotorEx) LeftBack).setVelocity(0);
-        ((DcMotorEx) RightFront).setVelocity(0);
-        ((DcMotorEx) RightBack).setVelocity(0);
-        LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        goStraight(2500);
-
-        FrontWobble.setPosition(1);
-        BackWobble.setPosition(1);
-        
-        goBackwards(-1000);
-
-        
-        telemetry.addData("ring", "One rings");
-      }
-      else {
-        //do stuff finally
-        LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftFront.setTargetPosition(250);
-        LeftBack.setTargetPosition(250);
-
-        LeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        ((DcMotorEx) LeftFront).setVelocity(650);
-        ((DcMotorEx) LeftBack).setVelocity(650);
-        while (LeftFront.isBusy()) {
-        }
-        ((DcMotorEx) LeftFront).setVelocity(0);
-        ((DcMotorEx) LeftBack).setVelocity(0);
-
-        sleep(3000);
-
-        goStraight(2600);
-
-        LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftFront.setTargetPosition(-150);
-        RightFront.setTargetPosition(150);
-        LeftBack.setTargetPosition(-150);
-        RightBack.setTargetPosition(150);
-        LeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        RightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        RightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        ((DcMotorEx) LeftFront).setVelocity(-600);
-        ((DcMotorEx) LeftBack).setVelocity(-600);
-        ((DcMotorEx) RightFront).setVelocity(600);
-        ((DcMotorEx) RightBack).setVelocity(600);
-        while (LeftFront.isBusy()) {
-        }
-        ((DcMotorEx) LeftFront).setVelocity(0);
-        ((DcMotorEx) LeftBack).setVelocity(0);
-        ((DcMotorEx) RightFront).setVelocity(0);
-        ((DcMotorEx) RightBack).setVelocity(0);
-        LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        goStraight(3750);
-
-        FrontWobble.setPosition(1);
-        BackWobble.setPosition(1);
-        
-        goBackwards(-2000);
-        telemetry.addData("ring", "Four rings");
-      }
-
-      telemetry.update();
-
-      
     }
-    
-    
-    
-    sleep(100000);
-    // Deactivate TFOD.
-    tfodUltimateGoal.deactivate();
-
-    vuforiaUltimateGoal.close();
-    tfodUltimateGoal.close();
-  }
-
-  /**
-   * Display info (using telemetry) for a recognized object.
-   */
-   
-  private void goBackwards(int i) {
-    LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    LeftFront.setTargetPosition(i);
-    RightFront.setTargetPosition(i);
-    LeftBack.setTargetPosition(i);
-    RightBack.setTargetPosition(i);
-    LeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    LeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    RightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    RightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    ((DcMotorEx) LeftFront).setVelocity(-1200);
-    ((DcMotorEx) LeftBack).setVelocity(-1200);
-    ((DcMotorEx) RightFront).setVelocity(-1200);
-    ((DcMotorEx) RightBack).setVelocity(-1200);
-    while (LeftFront.isBusy()) {
-    }
-    ((DcMotorEx) LeftFront).setVelocity(0);
-    ((DcMotorEx) LeftBack).setVelocity(0);
-    ((DcMotorEx) RightFront).setVelocity(0);
-    ((DcMotorEx) RightBack).setVelocity(0);
-    LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-  }
-   
-  private void goStraight(int i) {
-    LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    LeftFront.setTargetPosition(i);
-    RightFront.setTargetPosition(i);
-    LeftBack.setTargetPosition(i);
-    RightBack.setTargetPosition(i);
-    LeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    LeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    RightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    RightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    ((DcMotorEx) LeftFront).setVelocity(1200);
-    ((DcMotorEx) LeftBack).setVelocity(1200);
-    ((DcMotorEx) RightFront).setVelocity(1200);
-    ((DcMotorEx) RightBack).setVelocity(1200);
-    while (LeftFront.isBusy()) {
-    }
-    ((DcMotorEx) LeftFront).setVelocity(0);
-    ((DcMotorEx) LeftBack).setVelocity(0);
-    ((DcMotorEx) RightFront).setVelocity(0);
-    ((DcMotorEx) RightBack).setVelocity(0);
-    LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-  }
-   
-  private void displayInfo(double i) {
-    // Display label info.
-    // Display the label and index number for the recognition.
-    telemetry.addData("label " + i, recognition.getLabel());
-    // Display upper corner info.
-    // Display the location of the top left corner
-    // of the detection boundary for the recognition
-    telemetry.addData("Left, Top " + i, recognition.getLeft() + ", " + recognition.getTop());
-    // Display lower corner info.
-    // Display the location of the bottom right corner
-    // of the detection boundary for the recognition
-    telemetry.addData("Right, Bottom " + i, recognition.getRight() + ", " + recognition.getBottom());
   }
 }

@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "FullDriveJava")
-public class FullDriveJava extends LinearOpMode {
+@TeleOp(name = "FullDriveJavaTwoPerson")
+public class FullDriveJavaTwoPerson extends LinearOpMode {
 
   private DcMotor LeftFront;
   private DcMotor LeftBack;
@@ -98,17 +98,33 @@ public class FullDriveJava extends LinearOpMode {
           ((DcMotorEx) rightflywheel).setVelocity(0);
         }
         if (gamepad2.dpad_up == true) {
+          ((DcMotorEx) LeftBack).setVelocity(0);
+          ((DcMotorEx) LeftFront).setVelocity(0);
+          ((DcMotorEx) RightBack).setVelocity(0);
+          ((DcMotorEx) RightFront).setVelocity(0);
           ((DcMotorEx) rightflywheel).setVelocity(850);
           ((DcMotorEx) leftflywheel).setVelocity(850);
           sleep(1000);
           for (int count = 0; count < 3; count++) {
-            if (gamepad1.dpad_down == true) {
+            if (gamepad2.dpad_down == true) {
               break;
             }
             intake.setPower(-0.8);
+            if (gamepad2.dpad_down == true) {
+              break;
+            }
             sleep(1250);
+            if (gamepad2.dpad_down == true) {
+              break;
+            }
             intake.setPower(0);
+            if (gamepad2.dpad_down == true) {
+              break;
+            }
             sleep(800);
+            if (gamepad2.dpad_down == true) {
+              break;
+            }
           }
           ((DcMotorEx) leftflywheel).setVelocity(0);
           ((DcMotorEx) rightflywheel).setVelocity(0);
