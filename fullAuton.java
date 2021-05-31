@@ -74,7 +74,7 @@ public class Autonomus extends LinearOpMode {
     // in the Camera Stream preview window on the Driver Station.
     tfodUltimateGoal.activate();
     // Enable following block to zoom in on target.
-    tfodUltimateGoal.setZoom(2.5, 16 / 9);
+    tfodUltimateGoal.setZoom(3, 17 / 9);
     telemetry.addData(">", "Press Play to start");
     telemetry.update();
     // Wait for start command from Driver Station.
@@ -101,28 +101,72 @@ public class Autonomus extends LinearOpMode {
     
     waitForStart();
     if (opModeIsActive()) {
-      FrontWobble.setPosition(0);
+      numberOfRings = 0;
       BackWobble.setPosition(0);
+      sleep(2000);
+      FrontWobble.setPosition(0);
       recognitions = tfodUltimateGoal.getRecognitions();
       // If list is empty, inform the user. Otherwise, go
       // through list and display info for each recognition.
-      
-      vuforiaDetect();
+      if (recognitions.size() == 0) {
+          telemetry.addData("TFOD", "No items detected.");
+          numberOfRings = 0;
+      } else {
+          index = 0;
+          // Iterate through list and call a function to
+          // display info for each recognized object.
+          for (Recognition recognition_item : recognitions) {
+            recognition = recognition_item;
+            if (recognition.getLabel() == "Quad") {
+              numberOfRings = 4;
+              break;
+            }
+            else if (recognition.getLabel() == "Single") {
+              numberOfRings = numberOfRings + 1;
+              if (numberOfRings > 1) {
+                telemetry.addData("Trevon Stinks", "He Smells");
+                telemetry.update();
+                numberOfRings = 4;
+                break;
+              }
+            }
+            // Display info.
+            displayInfo(index);
+            // Increment index.
+            index = index + 1;
+          }
+      }
       
       sleep(1000);
       
-      telemetry.addData("Status", "Shooting Rings");
+      telemetry.addData("Vuforia Done ", "090909");
       
       telemetry.update();
       
-      shootFull(1010);
+      goStraight(50);
+      
 
+      leftflywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+      rightflywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+      ((DcMotorEx) rightflywheel).setVelocity(1010);
+      ((DcMotorEx) leftflywheel).setVelocity(1010);
+      sleep(1000);
+      for (int count = 0; count < 3; count++) {
+        if (gamepad1.dpad_down == true) {
+          break;
+        }
+        intake.setPower(0.8);
+        sleep(1350);
+        intake.setPower(0);
+        sleep(500);
+      }
+      ((DcMotorEx) rightflywheel).setVelocity(0);
+      ((DcMotorEx) leftflywheel).setVelocity(0);
       // Put run blocks here.
      
       if (numberOfRings == 0) {
         //do stuff
-        telemetry.addData("Status", "Executing Zero Rings");
-        telemetry.update()
+        telemetry.addData("Ring", "Zero rings");
         goStraight(4000);
         FrontWobble.setPosition(1);
         BackWobble.setPosition(1);
@@ -130,9 +174,6 @@ public class Autonomus extends LinearOpMode {
         
       }
       else if (numberOfRings == 1) {
-        telemetry.addData("Status", "Executing One Ring");
-        telemetry.update()
-
         LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LeftFront.setTargetPosition(250);
@@ -156,10 +197,10 @@ public class Autonomus extends LinearOpMode {
         RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftFront.setTargetPosition(-450);
-        RightFront.setTargetPosition(450);
-        LeftBack.setTargetPosition(-450);
-        RightBack.setTargetPosition(450);
+        LeftFront.setTargetPosition(-500);
+        RightFront.setTargetPosition(500);
+        LeftBack.setTargetPosition(-500);
+        RightBack.setTargetPosition(500);
         LeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         RightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -179,21 +220,81 @@ public class Autonomus extends LinearOpMode {
         RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        goStraight(3000);
+        goStraight(2500);
 
         FrontWobble.setPosition(1);
         BackWobble.setPosition(1);
+        
+        goBackwards(-1000);
 
         
         telemetry.addData("ring", "One rings");
       }
       else {
-        telemetry.addData("Status", "Executing Four Rings");
-        telemetry.update()
+        //do stuff finally
+        LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LeftFront.setTargetPosition(250);
+        LeftBack.setTargetPosition(250);
+
+        LeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        LeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        ((DcMotorEx) LeftFront).setVelocity(650);
+        ((DcMotorEx) LeftBack).setVelocity(650);
+        while (LeftFront.isBusy()) {
+        }
+        ((DcMotorEx) LeftFront).setVelocity(0);
+        ((DcMotorEx) LeftBack).setVelocity(0);
+
+        sleep(3000);
+
+        goStraight(2600);
+
+        LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LeftFront.setTargetPosition(-150);
+        RightFront.setTargetPosition(150);
+        LeftBack.setTargetPosition(-150);
+        RightBack.setTargetPosition(150);
+        LeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        LeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        RightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        RightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        ((DcMotorEx) LeftFront).setVelocity(-600);
+        ((DcMotorEx) LeftBack).setVelocity(-600);
+        ((DcMotorEx) RightFront).setVelocity(600);
+        ((DcMotorEx) RightBack).setVelocity(600);
+        while (LeftFront.isBusy()) {
+        }
+        ((DcMotorEx) LeftFront).setVelocity(0);
+        ((DcMotorEx) LeftBack).setVelocity(0);
+        ((DcMotorEx) RightFront).setVelocity(0);
+        ((DcMotorEx) RightBack).setVelocity(0);
+        LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        goStraight(3750);
+
+        FrontWobble.setPosition(1);
+        BackWobble.setPosition(1);
+        
+        goBackwards(-2000);
+        telemetry.addData("ring", "Four rings");
       }
+
+      telemetry.update();
+
       
     }
-
+    
+    
+    
+    sleep(100000);
     // Deactivate TFOD.
     tfodUltimateGoal.deactivate();
 
@@ -201,24 +302,37 @@ public class Autonomus extends LinearOpMode {
     tfodUltimateGoal.close();
   }
 
-  private void shoot(int speed) {
-    leftflywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-      rightflywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-      ((DcMotorEx) rightflywheel).setVelocity(speed);
-      ((DcMotorEx) leftflywheel).setVelocity(speed);
-      sleep(1000);
-      
-      for (int count = 0; count < 3; count++) {
-        if (gamepad1.dpad_down == true) {
-          break;
-        }
-        intake.setPower(0.8);
-        sleep(1350);
-        intake.setPower(0);
-        sleep(500);
-      }
-      ((DcMotorEx) rightflywheel).setVelocity(0);
-      ((DcMotorEx) leftflywheel).setVelocity(0);
+  /**
+   * Display info (using telemetry) for a recognized object.
+   */
+   
+  private void goBackwards(int i) {
+    LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    LeftFront.setTargetPosition(i);
+    RightFront.setTargetPosition(i);
+    LeftBack.setTargetPosition(i);
+    RightBack.setTargetPosition(i);
+    LeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    LeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    RightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    RightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    ((DcMotorEx) LeftFront).setVelocity(-1200);
+    ((DcMotorEx) LeftBack).setVelocity(-1200);
+    ((DcMotorEx) RightFront).setVelocity(-1200);
+    ((DcMotorEx) RightBack).setVelocity(-1200);
+    while (LeftFront.isBusy()) {
+    }
+    ((DcMotorEx) LeftFront).setVelocity(0);
+    ((DcMotorEx) LeftBack).setVelocity(0);
+    ((DcMotorEx) RightFront).setVelocity(0);
+    ((DcMotorEx) RightBack).setVelocity(0);
+    LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
   }
    
   private void goStraight(int i) {
@@ -248,31 +362,6 @@ public class Autonomus extends LinearOpMode {
     LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-  }
-
-  private void vuforiaDetect() {
-    if (recognitions.size() == 0) {
-      telemetry.addData("TFOD", "No items detected.");
-      numberOfRings = 0;
-    } 
-    else {
-      index = 0;
-      // Iterate through list and call a function to
-      // display info for each recognized object.
-      for (Recognition recognition_item : recognitions) {
-        recognition = recognition_item;
-        if (recognition.getLabel() == "Quad") {
-          numberOfRings = 4;
-        }
-        else if (recognition.getLabel() == "Single") {
-          numberOfRings = 1;
-        }
-        // Display info.
-        displayInfo(index);
-        // Increment index.
-        index = index + 1;
-      }
-    }
   }
    
   private void displayInfo(double i) {
