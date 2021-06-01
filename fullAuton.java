@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Autonomus")
+@Autonomous(name = "Autonomus")
 public class Autonomus extends LinearOpMode {
 
   private VuforiaCurrentGame vuforiaUltimateGoal;
@@ -124,7 +124,6 @@ public class Autonomus extends LinearOpMode {
             else if (recognition.getLabel() == "Single") {
               numberOfRings = numberOfRings + 1;
               if (numberOfRings > 1) {
-                telemetry.addData("Trevon Stinks", "He Smells");
                 telemetry.update();
                 numberOfRings = 4;
                 break;
@@ -139,7 +138,7 @@ public class Autonomus extends LinearOpMode {
       
       sleep(1000);
       
-      telemetry.addData("Vuforia Done ", "090909");
+      telemetry.addData("Vuforia Done ", numberOfRings);
       
       telemetry.update();
       
@@ -166,7 +165,6 @@ public class Autonomus extends LinearOpMode {
      
       if (numberOfRings == 0) {
         //do stuff
-        telemetry.addData("Ring", "Zero rings");
         goStraight(4000);
         FrontWobble.setPosition(1);
         BackWobble.setPosition(1);
@@ -226,9 +224,6 @@ public class Autonomus extends LinearOpMode {
         BackWobble.setPosition(1);
         
         goBackwards(-1000);
-
-        
-        telemetry.addData("ring", "One rings");
       }
       else {
         //do stuff finally
@@ -284,7 +279,6 @@ public class Autonomus extends LinearOpMode {
         BackWobble.setPosition(1);
         
         goBackwards(-2000);
-        telemetry.addData("ring", "Four rings");
       }
 
       telemetry.update();
